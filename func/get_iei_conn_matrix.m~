@@ -1,0 +1,37 @@
+function [ds] = get_iei_conn_matrix(clust, chan_labels,Fs, min_ne)
+count=0;
+ds=[];
+d=0;
+for k=1:length(clust)
+    if length(clust{k,1}.events) >= min_ne
+        tmp=split(clust{k,1}.event_id,'_');
+        clust{k,1}.chan = tmp(:,:,1);
+        chans=squeeze(tmp(:,:,1));
+        count=count+1;
+        for m=1:1:length(chans)
+            for n=m+1:length(chans)
+                if strcmp(chans{m}, chans{n}) ~= 1
+                    d=d+1;
+                    ds.chanPairs(d,:) = [find(strcmp(chan_labels, chans{m})), find(strcmp(chan_labels, chans{n}))];
+                    ds.connectStrength(d,1) = (double(abs(clust{k,1}.peak_index(m) - clust{k,1}.peak_index(n))))./Fs;
+                end
+                
+            end
+        end
+        
+    end
+    
+end
+if ~isempty(ds)
+    [unique_chans_pairs,~,idx] = unique(ds.chanPairs,'rows');
+    s=[];
+    for jj=1:1:max(ic)
+        id =find(ic==jj);
+        s.connectStrength(jj)=mean(ds.connectStrength(id));
+        s.connectStrengthstd(jj)=std(ds.connectStrength(id));
+        s.connectFreq(jj)=length(id);
+        s.chanPairs(jj,:)=C(jj,:);
+    end
+end
+end
+

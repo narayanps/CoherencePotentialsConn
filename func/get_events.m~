@@ -1,0 +1,43 @@
+function [I] = get_events(data, abs_sd, fact, offset)
+%UNTITLED5 Summary of this function goes here
+%   Detailed explanation goes here
+peak_thr = -fact*abs_sd;
+I =find(data < peak_thr);
+B=[];
+for j=offset:length(data)-offset
+    if (data(j)>0 && data(j+1)<0) ||(data(j)<0 && data(j+1)>0)
+        B = [B j];
+    end
+end
+if length(I) > 0
+    ind = find(diff(I)>1);
+    trigs=B;
+    ends=B;
+    c=0;
+    if length(ind)>0
+        for k=1:length(ind)
+            t=find(trigs<I(ind(k)));
+            e=find(ends>=I(ind(k)));
+            e=ends(e(1));
+            if ~( isempty(t) || isempty(e))
+                t=trigs(t(length(t)));
+                c=c+1;
+                start_index(c) = t;
+                end_index(c) = e;
+            else
+                continue
+            end
+            
+        end
+    end
+end
+start_index=unique(start_index);
+end_index = unique(end_index);
+for j=1:length(start_index)
+    seg = data(start_index(j):end_index(j));
+    m = nanmin(seg);
+end
+
+end
+
+
